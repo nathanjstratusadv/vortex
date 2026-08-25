@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install just
+        uses: extractions/setup-just@v4
+        with:
+          just-version: '1.58.0'
+
+      - name: Install pixi
+        run: |
+          curl -fsSL https://pixi.sh/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install dependencies
+        run: pixi install
+
+      - name: Build
+        run: just build
+
+      - name: Run tests
+        run: just test tests/vortex_db_test.mojo
+
+      - name: Smoke test server
+        run: |
+          set -euo pipefail
+          ./vortex &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+
+          # Wait for the server to bind (up to 5 seconds)
+          for attempt in $(seq 1 10); do
+            if curl -s -o /dev/null http://127.0.0.1:8000/; then
+              break
+            fi
+            sleep 0.5
+          done
+
+          curl -sf http://127.0.0.1:8000/ | grep -q 'vortex:'
+          curl -sf -X POST -d 'store key some value' http://127.0.0.1:8000/ | grep -qx 'stored key'
+          curl -sf -X POST -d 'fetch key' http://127.0.0.1:8000/ | grep -qx 'some value'
+          curl -sf -X POST -d 'delete key' http://127.0.0.1:8000/ | grep -qx 'deleted key'
+          [ "$(curl -s -o /dev/null -w '%{http_code}' -X POST -d 'fetch key' http://127.0.0.1:8000/)" = "404" ]
+          echo 'smoke test passed'
