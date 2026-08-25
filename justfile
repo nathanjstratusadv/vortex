@@ -1,26 +1,26 @@
-set working-directory := "./src"
-
 default:
 	just --list
 
+setup:
+	pixi install
+
 build:
-    pixi run mojo build main.mojo -o ../vortex
+	pixi run mojo build src/main.mojo -o vortex
 
 clean:
-    rm -f vortex
+	rm -f vortex
 
 exe:
-	../vortex
+	./vortex
 
 mojo *args:
 	pixi run mojo {{ args }}
 
 run:
-	pixi run mojo main.mojo
-
-setup:
-	pixi install
+	pixi run mojo run -I src src/main.mojo
 
 test *args:
-	pixi run mojo run -I . {{ args }}
+	pixi run mojo run -I src {{ args }}
 
+test-all:
+	@for test_file in $(find test -name 'test_*.mojo' | sort); do pixi run mojo run -I src "$test_file" || exit 1; done

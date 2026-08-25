@@ -1,7 +1,7 @@
 """Tests for the in-memory string database (`server.db`).
 
-Run the whole file:  just test tests/vortex_db_test.mojo
-Run a single test:   just test tests/vortex_db_test.mojo --only test_delete_removes_present_key
+Run the whole file:  just test test/server/test_db.mojo
+Run a single test:   just test test/server/test_db.mojo --only test_delete_removes_present_key
 """
 
 from std.testing import TestSuite, assert_equal, assert_true

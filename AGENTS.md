@@ -6,17 +6,17 @@
 
 - Toolchain: `just` + `pixi` (Mojo 1.x from `conda.modular.com/max`); `pixi run`/`just` recipes depend on the pixi env.
 - `just setup` — creates/updates the pixi environment (`pixi install`); run this first on a fresh checkout.
-- `just build` — compiles `src/main.mojo` to `./vortex` in the project root (not `src/`).
-- `just run` — runs from source without building.
-- `just clean` — no-op in practice: the justfile runs with `set working-directory := "./src"`, so `clean` `rm -f`s `src/vortex` while `just build` emits the binary to the repo root; delete `./vortex` by hand to actually clean the build.
-- `just test <file> [--only <test-name>]` — runs a test file (from `src/tests/`); the recipe adds `-I .` so `server.*` imports resolve. Fails non-zero on any failure.
+- `just build` — compiles `src/main.mojo` to `./vortex` at the repo root; `just clean` removes it (and `just exe` runs it).
+- `just run` — runs from source without building (`mojo run -I src src/main.mojo`).
+- `just test <file> [--only <test-name>]` — runs a test file (from `test/`); the recipe adds `-I src` so `server.*` and `consts` imports resolve. Fails non-zero on any failure.
+- `just test-all` — discovers and runs every `test_*.mojo` under `test/`, failing non-zero if any file fails.
 - `just mojo <args>` — passthrough to the `mojo` CLI.
-- CI (`.github/workflows/ci.yml`): ubuntu-latest; installs `just` + `pixi`, then runs `just build`, `just test tests/vortex_db_test.mojo`, and a curl smoke test of the built `./vortex`. No linter or formatter config.
+- CI (`.github/workflows/ci.yml`): ubuntu-latest; installs `just` + `pixi`, then runs `just build`, `just test test/server/test_db.mojo`, and a curl smoke test of the built `./vortex`. No linter or formatter config.
 
 ## Tests
 
-- Files live in `src/tests/` (`*_test.mojo`); each is a standalone entrypoint: `def test_*() raises` functions, auto-discovered by `std.testing.TestSuite.discover_tests[__functions_in_module()]().run()` in `main()`.
-- Single test: `just test tests/vortex_db_test.mojo --only test_name` (`--skip` also exists).
+- Files live in `test/` at the repo root, mirroring the source packages: `test/server/test_db.mojo` tests `server/db.mojo`. Each is a standalone entrypoint: `def test_*() raises` functions, auto-discovered by `std.testing.TestSuite.discover_tests[__functions_in_module()]().run()` in `main()`.
+- Single test: `just test test/server/test_db.mojo --only test_name` (`--skip` also exists).
 - Gotcha: `Dict` iteration order is unspecified — never assert on `all_keys()` ordering, assert membership instead.
 
 ## Running the server
