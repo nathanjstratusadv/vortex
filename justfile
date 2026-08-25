@@ -9,11 +9,17 @@ build:
 clean:
     rm -f vortex
 
+exe:
+	../vortex
+
 mojo *args:
 	pixi run mojo {{ args }}
 
 run:
 	pixi run mojo main.mojo
+
+setup:
+	pixi install
 
 test *args:
 	pixi run mojo run -I . {{ args }}

@@ -13,8 +13,9 @@ from server.http import (
     STATUS_BAD_REQUEST,
     STATUS_NOT_FOUND,
 )
-from . import parser
-from .db import VortexDb
+from consts import __VERSION__
+from server import parser
+from server.db import VortexDb
 from server.router import Router
 from server.sockets import (
     socket,
@@ -87,6 +88,7 @@ struct HttpServer:
             _ = close(server_file_descriptor)
             raise Error('listen() failed: errno=', String(get_errno()))
 
+        print(t'Vortex {__VERSION__}')
         print('listening on http://127.0.0.1:', self.port)
 
         while True:

@@ -1,10 +1,14 @@
 # AGENTS.md
 
+- Official Mojo docs: https://mojolang.org/docs — verify any API you are not sure about against the v1 docs before coding; do not rely on pre-1.0 examples.
+
 ## Commands
 
-- Toolchain: `just` + `pixi` (Mojo 1.x from `conda.modular.com/max`).
+- Toolchain: `just` + `pixi` (Mojo 1.x from `conda.modular.com/max`); `pixi run`/`just` recipes depend on the pixi env.
+- `just setup` — creates/updates the pixi environment (`pixi install`); run this first on a fresh checkout.
 - `just build` — compiles `src/main.mojo` to `./vortex` in the project root (not `src/`).
-- `just run` — runs from source without building. `just clean` — removes the binary.
+- `just run` — runs from source without building.
+- `just clean` — no-op in practice: the justfile runs with `set working-directory := "./src"`, so `clean` `rm -f`s `src/vortex` while `just build` emits the binary to the repo root; delete `./vortex` by hand to actually clean the build.
 - `just test <file> [--only <test-name>]` — runs a test file (from `src/tests/`); the recipe adds `-I .` so `server.*` imports resolve. Fails non-zero on any failure.
 - `just mojo <args>` — passthrough to the `mojo` CLI.
 - CI (`.github/workflows/ci.yml`): ubuntu-latest; installs `just` + `pixi`, then runs `just build`, `just test tests/vortex_db_test.mojo`, and a curl smoke test of the built `./vortex`. No linter or formatter config.
@@ -17,7 +21,7 @@
 
 ## Running the server
 
-- Binds `127.0.0.1:8000`. A stale `vortex` process makes a new one fail with `bind() failed: errno=Address already in use` — `pkill -x vortex` first.
+- Listens on port `8000` (binds all interfaces; the log line and CI curls use `127.0.0.1:8000`). A stale `vortex` process makes a new one fail with `bind() failed: errno=Address already in use` — `pkill -x vortex` first.
 - Smoke test: `curl -s -X POST -d "store k some value" http://127.0.0.1:8000/`, then `fetch k` / `delete k` / `keys`; `GET /` and `GET /hello` print usage.
 - The build is warning-free. Do not reintroduce deprecated forms (e.g. Layout-less `alloc[T](n)`).
 - Mojo 1.0 memory API: `alloc(Layout[T](count=n))` returns an `Allocation` handle; its borrowed `unsafe_ptr()` keeps a generic origin and will NOT convert to a concrete `Pointer[T, MutUntrackedOrigin]`. At raw-pointer FFI boundaries (the `sockets.mojo` wrappers), take the exact raw pointer via `allocation^.unsafe_leak()` and release it with `pointer.unsafe_free()`.

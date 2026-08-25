@@ -1,4 +1,4 @@
-# Vortex DB
+# Vortex Database
 
 The string in and out database you never needed!
 
@@ -17,6 +17,8 @@ language!
 It's for people who do not want to deal with setting up complex structure for their projects and just want to get to 
 work.
 This database is also designed to be super easy for agentic artificial intelligence to use.
+
+At the current moment in time this system only support english and I hope in the future I can support more languages!
 
 ## Getting Started
 
