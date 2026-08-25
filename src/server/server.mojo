@@ -13,7 +13,7 @@ from server.http import (
     STATUS_BAD_REQUEST,
     STATUS_NOT_FOUND,
 )
-from consts import __VERSION__
+from config.consts import __VERSION__
 from server import parser
 from server.db import VortexDb
 from server.router import Router
@@ -210,3 +210,4 @@ struct HttpServer:
             response.body = String('unknown command: ') + command
 
         response.set_header(String('Content-Type'), String('text/plain'))
+
