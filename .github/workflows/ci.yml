@@ -28,7 +28,7 @@ jobs:
         run:           just build
 
       - name: Run tests
-        run: just test test/server/test_db.mojo
+        run: just test tests/server/test_db.mojo
 
       - name: Smoke test server
         run: |

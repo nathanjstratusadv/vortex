@@ -23,4 +23,4 @@ test *args:
 	pixi run mojo run -I src {{ args }}
 
 test-all:
-	@for test_file in $(find test -name 'test_*.mojo' | sort); do pixi run mojo run -I src "$test_file" || exit 1; done
+	@for test_file in $(find tests -name 'test_*.mojo' | sort); do pixi run mojo run -I src "$test_file" || exit 1; done

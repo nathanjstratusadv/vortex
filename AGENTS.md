@@ -8,15 +8,15 @@
 - `just setup` — creates/updates the pixi environment (`pixi install`); run this first on a fresh checkout.
 - `just build` — compiles `src/main.mojo` to `./vortex` at the repo root; `just clean` removes it (and `just exe` runs it).
 - `just run` — runs from source without building (`mojo run -I src src/main.mojo`).
-- `just test <file> [--only <test-name>]` — runs a test file (from `test/`); the recipe adds `-I src` so `server.*` and `consts` imports resolve. Fails non-zero on any failure.
-- `just test-all` — discovers and runs every `test_*.mojo` under `test/`, failing non-zero if any file fails.
+- `just test <file> [--only <test-name>]` — runs a test file (from `tests/`); the recipe adds `-I src` so `server.*`, `database.*`, and `consts` imports resolve. Fails non-zero on any failure.
+- `just test-all` — discovers and runs every `test_*.mojo` under `tests/`, failing non-zero if any file fails.
 - `just mojo <args>` — passthrough to the `mojo` CLI.
-- CI (`.github/workflows/ci.yml`): ubuntu-latest; installs `just` + `pixi`, then runs `just build`, `just test test/server/test_db.mojo`, and a curl smoke test of the built `./vortex`. No linter or formatter config.
+- CI (`.github/workflows/ci.yml`): ubuntu-latest; installs `just` + `pixi`, then runs `just build`, `just test tests/server/test_db.mojo`, and a curl smoke test of the built `./vortex`. No linter or formatter config.
 
 ## Tests
 
-- Files live in `test/` at the repo root, mirroring the source packages: `test/server/test_db.mojo` tests `server/db.mojo`. Each is a standalone entrypoint: `def test_*() raises` functions, auto-discovered by `std.testing.TestSuite.discover_tests[__functions_in_module()]().run()` in `main()`.
-- Single test: `just test test/server/test_db.mojo --only test_name` (`--skip` also exists).
+- Files live in `tests/` at the repo root, mirroring the source packages: `tests/server/test_db.mojo` tests `src/database/database.mojo`. Each is a standalone entrypoint: `def test_*() raises` functions, auto-discovered by `std.testing.TestSuite.discover_tests[__functions_in_module()]().run()` in `main()`.
+- Single test: `just test tests/server/test_db.mojo --only test_name` (`--skip` also exists).
 - Gotcha: `Dict` iteration order is unspecified — never assert on `all_keys()` ordering, assert membership instead.
 
 ## Running the server
@@ -28,9 +28,9 @@
 
 ## Architecture
 
-- MVC HTTP server in Mojo 1.0, all under `src/`: `server/sockets.mojo` (libc FFI), `server/server.mojo` (accept loop + command dispatch), `server/router.mojo` (`METHOD path` -> thin handler), `server/http.mojo` (`Request`/`Response`), `server/parser.mojo`, `server/db.mojo` (`VortexDb`).
+- MVC HTTP server in Mojo 1.0, all under `src/`: `src/server/sockets.mojo` (libc FFI), `src/server/server.mojo` (accept loop + command dispatch), `src/server/router.mojo` (`METHOD path` -> thin handler), `src/server/http/` package (`HttpRequest`/`HttpResponse`, parsing lives in `HttpRequest.__init__`), `src/database/database.mojo` (`Database`).
 - The freeform command endpoint (`POST /` and `POST /cmd`) is deliberately NOT in the stateless router; `HttpServer._dispatch_command` owns it.
-- Mojo 1.0 has no module-level globals or capturing closures: long-lived state lives on the server-owned struct (`VortexDb` inside `HttpServer`).
+- Mojo 1.0 has no module-level globals or capturing closures: long-lived state lives on the server-owned struct (`Database` inside `HttpServer`).
 - Data is in-memory only and resets on process restart.
 
 ## Code style
