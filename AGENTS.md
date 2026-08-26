@@ -35,6 +35,7 @@
 
 ## Code style
 
+- Write verbose code with no comments: never add docstrings, `#`-comments, or `//`-comments. Express intent through fully spelled-out identifiers and clear structure instead of prose.
 - Verbose naming: fully spelled-out identifiers (`request`, `file_descriptor`, `bytes_received`, `index` for loop variables). No shorthand (`req`, `fd`, `buf`, `n`, `i`) except where it mirrors the libc API in `sockets.mojo`.
-- Single-quoted string literals in code (including t-strings in `external_call`); docstrings stay triple-double-quoted. Strings containing an apostrophe stay double-quoted.
+- Single-quoted string literals in code (including t-strings in `external_call`). Strings containing an apostrophe stay double-quoted.
 - Gotcha: `mojo format` re-normalizes single-quoted literals back to double quotes. Do not run the formatter over the source (or re-apply the single-quote style afterwards).

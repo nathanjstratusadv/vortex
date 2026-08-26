@@ -1,9 +1,3 @@
-"""Tests for HTTP request parsing (`server.http.request.HttpRequest`).
-
-Run the whole file:  just test tests/server/test_parser.mojo
-Run a single test:   just test tests/server/test_parser.mojo --only test_parse_splits_query_string_from_path
-"""
-
 from std.testing import TestSuite, assert_equal, assert_true
 from server.http.request import HttpRequest
 

@@ -1,9 +1,3 @@
-"""Tests for the in-memory string database (`database.database`).
-
-Run the whole file:  just test tests/server/test_db.mojo
-Run a single test:   just test tests/server/test_db.mojo --only test_delete_removes_present_key
-"""
-
 from std.testing import TestSuite, assert_equal, assert_true
 from database.database import Database
 
@@ -42,7 +36,6 @@ def test_delete_absent_key_returns_false() raises:
 
 
 def test_all_keys_lists_every_stored_key() raises:
-    # Dict iteration order is unspecified, so assert membership, not order.
     var database = Database()
     database.store('alpha', '1')
     database.store('beta', '2')

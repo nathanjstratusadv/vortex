@@ -1,9 +1,3 @@
-"""Tests for HTTP response serialization (`server.http.response.HttpResponse`).
-
-Run the whole file:  just test tests/server/test_response.mojo
-Run a single test:   just test tests/server/test_response.mojo --only test_serialize_custom_status_line
-"""
-
 from std.testing import TestSuite, assert_equal, assert_true
 from server.http.response import HttpResponse
 from server.http.status import (

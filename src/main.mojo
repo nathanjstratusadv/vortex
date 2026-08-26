@@ -1,11 +1,3 @@
-"""A string-in / string-out database over HTTP (the vortex server).
-
-POST a freeform command in the request body (see the command grammar in
-`database.database`); the server replies with a plain-text string.  `GET /` and
-`GET /hello` print usage.  The data is an in-memory key/value map owned by the
-server; it resets when the process restarts.
-"""
-
 from server.server import HttpServer
 from server.router import Router
 from server.http.request import HttpRequest
