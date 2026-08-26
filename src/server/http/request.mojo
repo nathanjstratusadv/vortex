@@ -18,17 +18,17 @@ struct HttpRequest:
         self.body = HttpBody(raw_http_request)
         self._raw = raw_http_request
 
-        var lines = self.header.raw.split(String("\r\n"))
+        var lines = self.header.raw.split(String('\r\n'))
 
         if len(lines) > 0:
-            var request_line_parts = lines[0].split(String(" "))
+            var request_line_parts = lines[0].split(String(' '))
 
             if len(request_line_parts) >= 1:
                 self.method = String(request_line_parts[0])
 
             if len(request_line_parts) >= 2:
                 var target = String(request_line_parts[1])
-                var query_delimiter_position = target.find(String("?"))
+                var query_delimiter_position = target.find(String('?'))
 
                 if query_delimiter_position < 0:
                     self.path = target
@@ -39,10 +39,10 @@ struct HttpRequest:
                         target[byte = (query_delimiter_position + 1) :]
                     )
 
-                    var query_parameter_pairs = query.split(String("&"))
+                    var query_parameter_pairs = query.split(String('&'))
 
                     for key_value_pair in query_parameter_pairs:
-                        var equals_position = key_value_pair.find(String("="))
+                        var equals_position = key_value_pair.find(String('='))
 
                         if equals_position < 0:
                             self.query[String(key_value_pair)] = String()

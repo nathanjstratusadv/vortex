@@ -59,7 +59,7 @@ struct HttpServer:
         var server_file_descriptor = socket()
 
         if server_file_descriptor < 0:
-            raise Error("socket() failed: errno=", String(get_errno()))
+            raise Error('socket() failed: errno=', String(get_errno()))
 
         var socket_address = fill_sockaddr_in(self.port)
         var return_code = bind(server_file_descriptor, socket_address, 16)
@@ -68,13 +68,13 @@ struct HttpServer:
 
         if return_code < 0:
             _ = close(server_file_descriptor)
-            raise Error("bind() failed: errno=", String(get_errno()))
+            raise Error('bind() failed: errno=', String(get_errno()))
 
         return_code = listen(server_file_descriptor, self.backlog)
 
         if return_code < 0:
             _ = close(server_file_descriptor)
-            raise Error("listen() failed: errno=", String(get_errno()))
+            raise Error('listen() failed: errno=', String(get_errno()))
 
         print(t'Vortex {__VERSION__}')
         print(t'listening on http://127.0.0.1:{self.port}')
@@ -95,14 +95,14 @@ struct HttpServer:
 
         var route_matched = self.router.dispatch(request, response)
 
-        if not route_matched and request.method == String("POST"):
+        if not route_matched and request.method == String('POST'):
             self._dispatch_command(request, response)
         elif not route_matched:
             response.status.code = STATUS_NOT_FOUND
             response.body.data = (
-                String("<h1>404 Not Found</h1><p>No route for <code>")
+                String('<h1>404 Not Found</h1><p>No route for <code>')
                 + request.path
-                + String("</code>.</p>")
+                + String('</code>.</p>')
             )
 
         var serialized_response = response.serialize()
@@ -131,12 +131,12 @@ struct HttpServer:
         mut request: HttpRequest,
         mut response: HttpResponse,
     ) raises:
-        if request.path != String("/") and request.path != String("/cmd"):
+        if request.path != String('/') and request.path != String('/cmd'):
             response.status.code = STATUS_NOT_FOUND
             response.body.data = (
-                String("<h1>404 Not Found</h1><p>No command route at <code>")
+                String('<h1>404 Not Found</h1><p>No command route at <code>')
                 + request.path
-                + String("</code>.</p>")
+                + String('</code>.</p>')
             )
             return
 
@@ -146,16 +146,16 @@ struct HttpServer:
         if len(command_parts) > 0:
             command = String(command_parts[0])
 
-        if command == String("store"):
+        if command == String('store'):
             if len(command_parts) >= 3:
                 var key = String(command_parts[1])
                 self.database.store(key, String(command_parts[2]))
-                response.body.data = String("stored ") + key
+                response.body.data = String('stored ') + key
             else:
                 response.status.code = STATUS_BAD_REQUEST
-                response.body.data = String("usage: store KEY VALUE...")
+                response.body.data = String('usage: store KEY VALUE...')
 
-        elif command == String("fetch"):
+        elif command == String('fetch'):
             if len(command_parts) >= 2:
                 var key = String(command_parts[1])
 
@@ -163,37 +163,37 @@ struct HttpServer:
                     response.body.data = self.database.fetch(key)
                 else:
                     response.status.code = STATUS_NOT_FOUND
-                    response.body.data = String("not found: ") + key
+                    response.body.data = String('not found: ') + key
 
             else:
                 response.status.code = STATUS_BAD_REQUEST
-                response.body.data = String("usage: fetch KEY")
+                response.body.data = String('usage: fetch KEY')
 
-        elif command == String("delete"):
+        elif command == String('delete'):
             if len(command_parts) >= 2:
                 var key = String(command_parts[1])
 
                 if self.database.delete(key):
-                    response.body.data = String("deleted ") + key
+                    response.body.data = String('deleted ') + key
                 else:
                     response.status.code = STATUS_NOT_FOUND
-                    response.body.data = String("not found: ") + key
+                    response.body.data = String('not found: ') + key
 
             else:
                 response.status.code = STATUS_BAD_REQUEST
-                response.body.data = String("usage: delete KEY")
+                response.body.data = String('usage: delete KEY')
 
-        elif command == String("keys"):
+        elif command == String('keys'):
             response.body.data = self.database.all_keys()
 
-        elif command == String(""):
+        elif command == String(''):
             response.status.code = STATUS_BAD_REQUEST
             response.body.data = String(
-                "empty command. usage: store/fetch/delete/keys"
+                'empty command. usage: store/fetch/delete/keys'
             )
 
         else:
             response.status.code = STATUS_BAD_REQUEST
-            response.body.data = String("unknown command: ") + command
+            response.body.data = String('unknown command: ') + command
 
-        response.set_header(String("Content-Type"), String("text/plain"))
+        response.set_header(String('Content-Type'), String('text/plain'))
