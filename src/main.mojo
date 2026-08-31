@@ -1,3 +1,4 @@
+from file.handler import FileHandler
 from server.server import HttpServer
 from server.router import Router
 from server.http.request import HttpRequest
@@ -22,6 +23,8 @@ def welcome_controller(
 
 
 def main() raises:
+    var file_handler = FileHandler()
+
     var router = Router()
 
     router.add('GET', '/', welcome_controller)
