@@ -1,5 +1,6 @@
 from std.memory import alloc, Layout
 from vortex.config.consts import __VERSION__
+from vortex.config.environment import get_port, get_host
 from vortex.server.http.request import HttpRequest
 from vortex.server.http.response import HttpResponse
 from vortex.server.http.status import STATUS_NOT_FOUND, STATUS_BAD_REQUEST
@@ -39,6 +40,7 @@ def _read_request(
 
 struct HttpServer:
     var port: Int
+    var host: String
     var router: Router
     var database: Database
     var backlog: Int32
@@ -47,10 +49,10 @@ struct HttpServer:
         out self,
         var router: Router,
         var database: Database,
-        port: Int = 8000,
         backlog: Int32 = 128,
     ):
-        self.port = port
+        self.port = get_port()
+        self.host = get_host()
         self.router = router^
         self.database = database^
         self.backlog = backlog
@@ -61,7 +63,7 @@ struct HttpServer:
         if server_file_descriptor < 0:
             raise Error('socket() failed: errno=', String(get_errno()))
 
-        var socket_address = fill_sockaddr_in(self.port)
+        var socket_address = fill_sockaddr_in(self.port, self.host)
         var return_code = bind(server_file_descriptor, socket_address, 16)
 
         socket_address.unsafe_free()
@@ -77,7 +79,7 @@ struct HttpServer:
             raise Error('listen() failed: errno=', String(get_errno()))
 
         print(t'Vortex {__VERSION__}')
-        print(t'listening on http://127.0.0.1:{self.port}')
+        print(t'listening on http://{self.host}:{self.port}')
 
         while True:
             var client_file_descriptor = accept(server_file_descriptor)

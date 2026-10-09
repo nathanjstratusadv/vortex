@@ -31,6 +31,6 @@ def main() raises:
 
     var database = Database()
 
-    var server = HttpServer(port=8000, router=router^, database=database^)
+    var server = HttpServer(router=router^, database=database^)
 
     server.serve()

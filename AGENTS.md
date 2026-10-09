@@ -19,12 +19,13 @@
 - Files live in `tests/` at the repo root, mirroring the source packages: `tests/server/test_db.mojo` tests `src/database/database.mojo`. Each is a standalone entrypoint: `def test_*() raises` functions, auto-discovered by `std.testing.TestSuite.discover_tests[__functions_in_module()]().run()` in `main()`.
 - Single test: `just test tests/server/test_db.mojo --only test_name` (`--skip` also exists to skip one).
 - Gotcha: tests import from `src` via `-I src` (the `test`/`test-all` recipes add it); import paths mirror source packages, e.g. `from server.http.request import HttpRequest`.
+- Gotcha: do NOT add `__init__.mojo` to `tests/` or `tests/server/`. The tests are standalone scripts, not a package; making them a package makes the LSP report `'main()' is not supported within packages` on every test file.
 - Gotcha: `Dict` iteration order is unspecified — never assert on `all_keys()` ordering, assert membership instead.
 
 ## Running the server
 
-- Listens on port `8000` (binds all interfaces; the log line and CI curls use `127.0.0.1:8000`). A stale `vortex` process makes a new one fail with `bind() failed: errno=Address already in use` — `pkill -x vortex` first.
-- Smoke test: `curl -s -X POST -d "store k some value" http://127.0.0.1:8000/`, then `fetch k` / `delete k` / `keys`; `GET /` and `GET /hello` print usage.
+- Listens on port `VORTEX_DB_PORT` (default `8700`) bound to host `VORTEX_DB_HOST` (default `127.0.0.1`, loopback only). Set `VORTEX_DB_HOST=0.0.0.0` to accept outside connections. The host is passed to `fill_sockaddr_in` (server/sockets.mojo), which resolves it via `inet_addr`. A stale `vortex` process makes a new one fail with `bind() failed: errno=Address already in use` — `pkill -x vortex` first.
+- Smoke test: `curl -s -X POST -d "store k some value" http://127.0.0.1:8700/`, then `fetch k` / `delete k` / `keys`; `GET /` prints usage.
 - Requests are read with a single `recv` of up to 8192 bytes in `_read_request` (server.mojo) — no loop, so larger payloads are silently truncated. Keeping command payloads under 8 KB avoids surprising behavior.
 - The build is warning-free. Do not reintroduce deprecated forms (e.g. Layout-less `alloc[T](n)`).
 - Mojo 1.0 memory API: `alloc(Layout[T](count=n))` returns an `Allocation` handle; its borrowed `unsafe_ptr()` keeps a generic origin and will NOT convert to a concrete `Pointer[T, MutUntrackedOrigin]`. At raw-pointer FFI boundaries (the `sockets.mojo` wrappers), take the exact raw pointer via `allocation^.unsafe_leak()` and release it with `pointer.unsafe_free()`.

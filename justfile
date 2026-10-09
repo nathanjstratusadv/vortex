@@ -1,14 +1,17 @@
+set dotenv-load := true
+set dotenv-required := true
+set dotenv-filename := ".env.development"
+
 default:
 	just --list
 
 setup:
 	pixi install
 
-build:
-	pixi run mojo build src/main.mojo -o .bin/vortex
 
-clean:
-	rm -f vortex
+build:
+	mkdir -p .bin/
+	pixi run mojo build src/main.mojo -o .bin/vortex
 
 exe:
 	./vortex
