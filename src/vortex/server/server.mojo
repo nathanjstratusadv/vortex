@@ -1,11 +1,11 @@
 from std.memory import alloc, Layout
-from config.consts import __VERSION__
-from server.http.request import HttpRequest
-from server.http.response import HttpResponse
-from server.http.status import STATUS_NOT_FOUND, STATUS_BAD_REQUEST
-from database.database import Database
-from server.router import Router
-from server.sockets import (
+from vortex.config.consts import __VERSION__
+from vortex.server.http.request import HttpRequest
+from vortex.server.http.response import HttpResponse
+from vortex.server.http.status import STATUS_NOT_FOUND, STATUS_BAD_REQUEST
+from vortex.database.database import Database
+from vortex.server.router import Router
+from vortex.server.sockets import (
     socket,
     bind,
     listen,

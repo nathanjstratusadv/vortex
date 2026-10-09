@@ -1,5 +1,5 @@
-from server.http.response import HttpResponse
-from server.http.request import HttpRequest
+from vortex.server.http.response import HttpResponse
+from vortex.server.http.request import HttpRequest
 
 comptime Handler = def(
     mut request: HttpRequest,

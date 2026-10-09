@@ -1,6 +1,6 @@
-from server.http.status import Status
-from server.http.body import HttpBody
-from server.http.header import HttpHeader
+from vortex.server.http.status import Status
+from vortex.server.http.body import HttpBody
+from vortex.server.http.header import HttpHeader
 
 struct HttpResponse:
     var status: Status

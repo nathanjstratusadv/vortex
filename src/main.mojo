@@ -1,9 +1,9 @@
-from file.handler import FileHandler
-from server.server import HttpServer
-from server.router import Router
-from server.http.request import HttpRequest
-from server.http.response import HttpResponse
-from database.database import Database
+from vortex.file.handler import FileHandler
+from vortex.server.server import HttpServer
+from vortex.server.router import Router
+from vortex.server.http.request import HttpRequest
+from vortex.server.http.response import HttpResponse
+from vortex.database.database import Database
 
 
 def welcome_controller(
@@ -23,7 +23,7 @@ def welcome_controller(
 
 
 def main() raises:
-    var file_handler = FileHandler()
+    var _ = FileHandler()
 
     var router = Router()
 

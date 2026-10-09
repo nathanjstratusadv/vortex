@@ -1,6 +1,6 @@
 from std.testing import TestSuite, assert_equal, assert_true
-from server.http.response import HttpResponse
-from server.http.status import (
+from vortex.server.http.response import HttpResponse
+from vortex.server.http.status import (
     STATUS_OK,
     STATUS_BAD_REQUEST,
     STATUS_NOT_FOUND,

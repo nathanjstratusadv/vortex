@@ -1,9 +1,10 @@
+.backplan/
+.bin/
 .claude/
+.crush/
 .opencode/
 .constellation/
 .idea/
 .pixi/
 !.pixi/config.toml
-vortex
-vortex.exe
 .vortex/

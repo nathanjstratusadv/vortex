@@ -5,7 +5,7 @@ setup:
 	pixi install
 
 build:
-	pixi run mojo build src/main.mojo -o vortex
+	pixi run mojo build src/main.mojo -o .bin/vortex
 
 clean:
 	rm -f vortex
@@ -24,3 +24,9 @@ test *args:
 
 test-all:
 	@for test_file in $(find tests -name 'test_*.mojo' | sort); do pixi run mojo run -I src "$test_file" || exit 1; done
+
+lsp-wrap:
+	@if [ ! -f .pixi/envs/default/bin/mojo-lsp-server-real ]; then mv .pixi/envs/default/bin/mojo-lsp-server .pixi/envs/default/bin/mojo-lsp-server-real; fi
+	@printf '%s\n' '#!/usr/bin/env bash' 'exec "$(dirname "$0")/mojo-lsp-server-real" -I "$(dirname "$0")/../../../../src" "$@"' > .pixi/envs/default/bin/mojo-lsp-server
+	@chmod +x .pixi/envs/default/bin/mojo-lsp-server
+	@echo 'wrapped .pixi/envs/default/bin/mojo-lsp-server with -I src'

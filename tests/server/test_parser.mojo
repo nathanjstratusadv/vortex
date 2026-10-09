@@ -1,5 +1,5 @@
 from std.testing import TestSuite, assert_equal, assert_true
-from server.http.request import HttpRequest
+from vortex.server.http.request import HttpRequest
 
 
 def test_parse_request_line_sets_method_and_path() raises:

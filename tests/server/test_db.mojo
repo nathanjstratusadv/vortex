@@ -1,5 +1,5 @@
 from std.testing import TestSuite, assert_equal, assert_true
-from database.database import Database
+from vortex.database.database import Database
 
 
 def test_store_and_fetch() raises:
