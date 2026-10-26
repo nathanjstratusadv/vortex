@@ -23,8 +23,10 @@ struct Router:
         mut response: HttpResponse,
     ) raises -> Bool:
         var key = request.method + ' ' + request.path
+
         if key in self.table:
             var handler: Handler = self.table[key]
             handler(request, response)
             return True
+
         return False

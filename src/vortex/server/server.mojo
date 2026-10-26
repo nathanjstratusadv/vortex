@@ -3,7 +3,7 @@ from vortex.config.consts import __VERSION__
 from vortex.config.environment import get_port, get_host
 from vortex.server.http.request import HttpRequest
 from vortex.server.http.response import HttpResponse
-from vortex.server.http.status import STATUS_NOT_FOUND, STATUS_BAD_REQUEST
+from vortex.server.http.status import STATUS_NOT_FOUND
 from vortex.database.database import Database
 from vortex.server.router import Router
 from vortex.server.sockets import (
@@ -19,6 +19,28 @@ from vortex.server.sockets import (
 )
 
 
+def _request_is_complete(received_text: String) raises -> Bool:
+    var separator_position = received_text.find(String('\r\n\r\n'))
+
+    if separator_position < 0:
+        return False
+
+    var header_lines = received_text[byte=0:separator_position].split(
+        String('\r\n')
+    )
+    var content_length = 0
+
+    for header_line in header_lines:
+        var lower_case_header_line = header_line.lower()
+
+        if lower_case_header_line.find(String('content-length:')) == 0:
+            var raw_length_value = String(header_line[byte=15:].strip())
+            content_length = Int(raw_length_value)
+
+    var expected_total_byte_count = separator_position + 4 + content_length
+    return received_text.byte_length() >= expected_total_byte_count
+
+
 def _read_request(
     file_descriptor: Int32, buffer_size: Int = 8192
 ) raises -> String:
@@ -28,10 +50,17 @@ def _read_request(
     var received_bytes = List[UInt8]()
 
     try:
-        var bytes_received = recv(file_descriptor, read_buffer, buffer_size)
-        if bytes_received > 0:
+        while True:
+            var bytes_received = recv(file_descriptor, read_buffer, buffer_size)
+
+            if bytes_received <= 0:
+                break
+
             for index in range(bytes_received):
                 received_bytes.append(read_buffer.unsafe_load(index))
+
+            if _request_is_complete(String(from_utf8=received_bytes)):
+                break
     finally:
         read_buffer.unsafe_free()
 
@@ -142,60 +171,5 @@ struct HttpServer:
             )
             return
 
-        var command_parts = request.body.data.split(None, maxsplit=2)
-        var command = String()
-
-        if len(command_parts) > 0:
-            command = String(command_parts[0])
-
-        if command == String('store'):
-            if len(command_parts) >= 3:
-                var key = String(command_parts[1])
-                self.database.store(key, String(command_parts[2]))
-                response.body.data = String('stored ') + key
-            else:
-                response.status.code = STATUS_BAD_REQUEST
-                response.body.data = String('usage: store KEY VALUE...')
-
-        elif command == String('fetch'):
-            if len(command_parts) >= 2:
-                var key = String(command_parts[1])
-
-                if self.database.contains(key):
-                    response.body.data = self.database.fetch(key)
-                else:
-                    response.status.code = STATUS_NOT_FOUND
-                    response.body.data = String('not found: ') + key
-
-            else:
-                response.status.code = STATUS_BAD_REQUEST
-                response.body.data = String('usage: fetch KEY')
-
-        elif command == String('delete'):
-            if len(command_parts) >= 2:
-                var key = String(command_parts[1])
-
-                if self.database.delete(key):
-                    response.body.data = String('deleted ') + key
-                else:
-                    response.status.code = STATUS_NOT_FOUND
-                    response.body.data = String('not found: ') + key
-
-            else:
-                response.status.code = STATUS_BAD_REQUEST
-                response.body.data = String('usage: delete KEY')
-
-        elif command == String('keys'):
-            response.body.data = self.database.all_keys()
-
-        elif command == String(''):
-            response.status.code = STATUS_BAD_REQUEST
-            response.body.data = String(
-                'empty command. usage: store/fetch/delete/keys'
-            )
-
-        else:
-            response.status.code = STATUS_BAD_REQUEST
-            response.body.data = String('unknown command: ') + command
-
+        response.body.data = self.database.process(request.body.data)
         response.set_header(String('Content-Type'), String('text/plain'))

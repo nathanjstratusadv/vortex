@@ -15,3 +15,6 @@ def get_port() -> Int:
 
 def get_host() -> String:
     return getenv('VORTEX_DB_HOST', '127.0.0.1')
+
+def debug_enabled() -> Bool:
+    return getenv('VORTEX_DB_DEBUG', '0') == '1'
